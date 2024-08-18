@@ -43,8 +43,8 @@ module Padded = struct
         row)
       tsv
 
-  let get_cell ~i ~j padded_tsv =
-    CCVector.get (CCVector.get padded_tsv i) j
+  let get_cell x y padded_tsv =
+    CCVector.get (CCVector.get padded_tsv y) x
 
   type cursor_action =
     | Previous

@@ -13,7 +13,7 @@ module Padded : sig
 
   val create : t -> padded
 
-  val get_cell : i:int -> j:int -> padded -> cell
+  val get_cell : int -> int -> padded -> cell
 
   type cursor_action =
     | Previous

@@ -1,9 +1,8 @@
 open Notty.Infix
 
 let tsv_to_image tsv =
-  Notty.I.tabulate (Tsv.Padded.number_of_columns tsv) (Tsv.Padded.number_of_lines tsv) (fun j i ->
-    (* TODO: Why is this reversed compared to the viewer? *)
-    let {Tsv.Padded.str; padding; last} = Tsv.Padded.get_cell ~i ~j tsv in
+  Notty.I.tabulate (Tsv.Padded.number_of_columns tsv) (Tsv.Padded.number_of_lines tsv) (fun x y ->
+    let {Tsv.Padded.str; padding; last} = Tsv.Padded.get_cell x y tsv in
     Notty.I.string Notty.A.empty
       (String.init (CCVector.length str) (fun i -> CCVector.get str i)) <|>
     if last then
