@@ -19,6 +19,8 @@ module Padded : sig
   val number_of_columns : padded -> int
 
   val insert_row : int -> padded -> unit
+
+  val recompute_padding : padded -> unit
 end
 
 module Cursor : sig

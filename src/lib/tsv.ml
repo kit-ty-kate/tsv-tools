@@ -28,18 +28,31 @@ module Padded = struct
   }
   type padded = cell CCVector.vector CCVector.vector
 
+  let compute_padding get_length cell x tsv f =
+    let max_length =
+      CCVector.fold (fun max cell -> Int.max max (get_length (CCVector.get cell x))) 0 tsv
+    in
+    let length = get_length cell in
+    f (max_length - length)
+
+  let recompute_padding tsv =
+    CCVector.iter (fun row ->
+      CCVector.iteri (fun x cell ->
+        let get_length cell = CCVector.length cell.str in
+        compute_padding get_length cell x tsv (fun padding ->
+          cell.padding <- padding))
+        row)
+      tsv
+
   let create tsv =
     CCVector.map (fun row ->
       CCVector.mapi (fun x cell ->
-        let max_length =
-          CCVector.fold (fun max cell -> Int.max max (CCVector.length (CCVector.get cell x))) 0 tsv
-        in
-        let length = CCVector.length cell in
-        {
-          str = cell;
-          padding = max_length - length;
-          last = Int.equal x (CCVector.length row - 1);
-        })
+        compute_padding CCVector.length cell x tsv (fun padding ->
+          {
+            str = cell;
+            padding;
+            last = Int.equal x (CCVector.length row - 1);
+          }))
         row)
       tsv
 
