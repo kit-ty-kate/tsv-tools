@@ -21,7 +21,7 @@ let cell_to_string ~tab ~i ~j array =
   let x = array.(i).(j) in
   let length = String.length x in
   let last = Int.equal j (Array.length array.(i) - 1) in
-  x ^ String.make (max_length - length + if last then 0 else tab) ' '
+  (x, String.make (max_length - length + if last then 0 else tab) ' ')
 
 let number_of_lines array = Array.length array.(0)
 let number_of_columns array = Array.length array

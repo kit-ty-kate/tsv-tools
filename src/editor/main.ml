@@ -1,6 +1,9 @@
+open Notty.Infix
+
 let tsv_to_image tsv =
   Notty.I.tabulate (Tsv.number_of_lines tsv) (Tsv.number_of_columns tsv) (fun j i ->
-    Notty.I.string Notty.A.empty (Tsv.cell_to_string ~tab:1 ~i ~j tsv))
+    let str, padding = Tsv.cell_to_string ~tab:1 ~i ~j tsv in
+    Notty.I.string Notty.A.empty str <|> Notty.I.string Notty.A.empty padding)
 
 let loop term tsv =
   Notty_unix.Term.image term (tsv_to_image tsv);

@@ -1,7 +1,9 @@
 let print tsv =
   for i = 0 to Tsv.number_of_lines tsv - 1 do
     for j = 0 to Tsv.number_of_columns tsv - 1 do
-      print_string (Tsv.cell_to_string ~tab:1 ~i ~j tsv);
+      let str, padding = Tsv.cell_to_string ~tab:1 ~i ~j tsv in
+      print_string str;
+      print_string padding;
     done;
     print_newline ();
   done
