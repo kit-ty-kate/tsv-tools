@@ -1,4 +1,9 @@
-val parse_from_string : string -> string array array
-val parse_from_file : string -> string array array
+type t
 
-val get_cell : tab:int -> i:int -> j:int -> string array array -> string
+val parse_from_string : string -> t
+val parse_from_file : string -> t
+
+val cell_to_string : tab:int -> i:int -> j:int -> t -> string
+
+val number_of_lines : t -> int
+val number_of_columns : t -> int

@@ -1,3 +1,5 @@
+type t = string array array
+
 let parse_from_string str =
   let lines = String.split_on_char '\n' str in
   let lines = match List.rev lines with
@@ -14,9 +16,12 @@ let parse_from_file file =
   Fun.protect ~finally:(fun () -> Stdlib.close_in ic) @@ fun () ->
   parse_from_string (Stdlib.In_channel.input_all ic)
 
-let get_cell ~tab ~i ~j array =
+let cell_to_string ~tab ~i ~j array =
   let max_length = Array.fold_left (fun max x -> Int.max max (String.length x.(j))) 0 array in
   let x = array.(i).(j) in
   let length = String.length x in
   let last = Int.equal j (Array.length array.(i) - 1) in
   x ^ String.make (max_length - length + if last then 0 else tab) ' '
+
+let number_of_lines array = Array.length array.(0)
+let number_of_columns array = Array.length array
