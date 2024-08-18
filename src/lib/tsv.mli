@@ -15,6 +15,12 @@ module Padded : sig
 
   val get_cell : i:int -> j:int -> padded -> cell
 
+  type cursor_action =
+    | Previous
+    | Next
+
+  val move_cursor : action:cursor_action -> sep:int -> int -> int -> padded -> int
+
   val number_of_lines : padded -> int
   val number_of_columns : padded -> int
 end

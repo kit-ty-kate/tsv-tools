@@ -46,6 +46,39 @@ module Padded = struct
   let get_cell ~i ~j padded_tsv =
     CCVector.get (CCVector.get padded_tsv i) j
 
+  type cursor_action =
+    | Previous
+    | Next
+
+  let move_cursor ~action ~sep x y padded_tsv =
+    let line = CCVector.get padded_tsv y in
+    let length = CCVector.length line in
+    let rec loop size i =
+      if (i : int) < (length : int) then
+        let {str; padding; last} = CCVector.get line i in
+        match action with
+        | Previous ->
+            if (x : int) <= size + CCVector.length str then
+              Int.max x 0
+            else
+              let next_size = size + CCVector.length str + if last then 0 else padding + sep in
+              if (x : int) <= (next_size : int) then
+                size + CCVector.length str
+              else
+                loop next_size (i + 1)
+        | Next ->
+            if (x : int) <= (size : int) then
+              size
+            else if (x : int) <= size + CCVector.length str then
+              Int.max x 0
+            else
+              let next_size = size + CCVector.length str + if last then 0 else padding + sep in
+              loop next_size (i + 1)
+      else
+        size
+    in
+    loop 0 0
+
   let number_of_lines padded_tsv = CCVector.length padded_tsv
   let number_of_columns padded_tsv = CCVector.length (CCVector.get padded_tsv 0)
 end
