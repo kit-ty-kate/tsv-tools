@@ -23,4 +23,6 @@ module Padded : sig
 
   val number_of_lines : padded -> int
   val number_of_columns : padded -> int
+
+  val insert_row : int -> padded -> unit
 end

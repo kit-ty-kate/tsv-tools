@@ -10,12 +10,16 @@ let tsv_to_image tsv =
     else
       Notty.I.string Notty.A.empty (String.make (padding + 1) ' '))
 
-let loop ~cursor term tsv =
+let rec loop ~cursor term tsv =
   Notty_unix.Term.image term (tsv_to_image tsv);
   let rec wait_for_event ~cursor =
     Notty_unix.Term.cursor term (Some cursor);
     match Notty_unix.Term.event term with
     | `End -> ()
+    | `Key (`Enter, []) ->
+        let _x, y = cursor in
+        Tsv.Padded.insert_row y tsv;
+        loop ~cursor:(0, y + 1) term tsv
     | `Key (`Arrow arrow, []) ->
         let cursor =
           let x, y = cursor in

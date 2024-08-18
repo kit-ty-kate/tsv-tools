@@ -81,4 +81,15 @@ module Padded = struct
 
   let number_of_lines padded_tsv = CCVector.length padded_tsv
   let number_of_columns padded_tsv = CCVector.length (CCVector.get padded_tsv 0)
+
+  let insert_row y padded_tsv =
+    CCVector.insert padded_tsv (y + 1)
+      (CCVector.init (number_of_columns padded_tsv)
+         (fun x ->
+            let {str; padding; last} = get_cell x y padded_tsv in
+            {
+              str = CCVector.create ();
+              padding = CCVector.length str + padding;
+              last;
+            }))
 end
