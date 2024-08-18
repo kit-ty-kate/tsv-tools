@@ -1,2 +1,3 @@
 (library
- (name tsv))
+ (name tsv)
+ (libraries containers))
