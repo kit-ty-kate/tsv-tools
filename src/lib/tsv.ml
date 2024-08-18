@@ -46,16 +46,32 @@ module Padded = struct
   let get_cell x y padded_tsv =
     CCVector.get (CCVector.get padded_tsv y) x
 
-  type cursor_action =
+  let number_of_lines padded_tsv = CCVector.length padded_tsv
+  let number_of_columns padded_tsv = CCVector.length (CCVector.get padded_tsv 0)
+
+  let insert_row y padded_tsv =
+    CCVector.insert padded_tsv (y + 1)
+      (CCVector.init (number_of_columns padded_tsv)
+         (fun x ->
+            let {str; padding; last} = get_cell x y padded_tsv in
+            {
+              str = CCVector.create ();
+              padding = CCVector.length str + padding;
+              last;
+            }))
+end
+
+module Cursor = struct
+  type action =
     | Previous
     | Next
 
-  let move_cursor ~action ~sep x y padded_tsv =
+  let move ~action ~sep x y padded_tsv =
     let line = CCVector.get padded_tsv y in
     let length = CCVector.length line in
     let rec loop size i =
       if (i : int) < (length : int) then
-        let {str; padding; last} = CCVector.get line i in
+        let {Padded.str; padding; last} = CCVector.get line i in
         match action with
         | Previous ->
             if (x : int) <= size + CCVector.length str then
@@ -79,17 +95,19 @@ module Padded = struct
     in
     loop 0 0
 
-  let number_of_lines padded_tsv = CCVector.length padded_tsv
-  let number_of_columns padded_tsv = CCVector.length (CCVector.get padded_tsv 0)
-
-  let insert_row y padded_tsv =
-    CCVector.insert padded_tsv (y + 1)
-      (CCVector.init (number_of_columns padded_tsv)
-         (fun x ->
-            let {str; padding; last} = get_cell x y padded_tsv in
-            {
-              str = CCVector.create ();
-              padding = CCVector.length str + padding;
-              last;
-            }))
+  let get_cell ~sep x y tsv =
+    let line = CCVector.get tsv y in
+    let length = CCVector.length line in
+    let rec loop size i =
+      if (i : int) < (length : int) then
+        let {Padded.str; padding; last} as cell = CCVector.get line i in
+        if (x : int) <= size + CCVector.length str then
+          (cell, x - size)
+        else
+          let next_size = size + CCVector.length str + if last then 0 else padding + sep in
+          loop next_size (i + 1)
+      else
+        raise Not_found
+    in
+    loop 0 0
 end
