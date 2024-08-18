@@ -1,5 +1,4 @@
-(* TODO: use Uchar instead *)
-type cell = char CCVector.vector
+type cell = Uchar.t CCVector.vector
 type t = cell CCVector.vector CCVector.vector
 
 let parse_from_string str =
@@ -10,9 +9,17 @@ let parse_from_string str =
   in
   let lines = List.map (fun x -> if String.length x > 0 && x.[String.length x - 1] = '\r' then String.sub x 0 (String.length x - 1) else x) lines in
   let lines = List.map (fun x -> String.split_on_char '\t' x) lines in
+  (* TODO: Transform to UTF-8 before this point *)
   CCVector.of_list (List.map (fun row ->
     CCVector.of_list (List.map (fun cell ->
-      CCVector.of_seq (String.to_seq cell)) row))
+      let decoder = Uutf.decoder ~encoding:`UTF_8 (`String cell) in
+      let str = CCVector.create_with ~capacity:(String.length cell) Uchar.min in
+      let rec loop () = match Uutf.decode decoder with
+        | `Await | `Malformed _ -> assert false
+        | `Uchar c -> CCVector.push str c; loop ()
+        | `End -> str
+      in
+      loop ()) row))
     lines)
 
 let parse_from_file file =
@@ -20,9 +27,35 @@ let parse_from_file file =
   Fun.protect ~finally:(fun () -> Stdlib.close_in ic) @@ fun () ->
   parse_from_string (Stdlib.In_channel.input_all ic)
 
+module Str = struct
+  type t = Uchar.t CCVector.vector
+
+  let to_string str =
+    let length = CCVector.length str in
+    let buf = Buffer.create length in
+    let encoder = Uutf.encoder `UTF_8 (`Buffer buf) in
+    let rec loop i =
+      if (i : int) < length then
+        match Uutf.encode encoder (`Uchar (CCVector.get str i)) with
+        | `Ok -> loop (i + 1)
+        | `Partial -> assert false
+      else
+        match Uutf.encode encoder `End with
+        | `Ok -> Buffer.contents buf
+        | `Partial -> assert false
+    in
+    loop 0
+
+  let insert str i c =
+    CCVector.insert str i c
+
+  let remove str i =
+    CCVector.remove_and_shift str i
+end
+
 module Padded = struct
   type cell = {
-    str : char CCVector.vector;
+    str : Str.t;
     mutable padding : int;
     mutable last : bool;
   }

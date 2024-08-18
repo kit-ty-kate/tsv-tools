@@ -3,9 +3,17 @@ type t
 val parse_from_string : string -> t
 val parse_from_file : string -> t
 
+module Str : sig
+  type t
+
+  val to_string : t -> string
+  val insert : t -> int -> Uchar.t -> unit
+  val remove : t -> int -> unit
+end
+
 module Padded : sig
   type cell = {
-    str : char CCVector.vector;
+    str : Str.t;
     mutable padding : int;
     mutable last : bool;
   }

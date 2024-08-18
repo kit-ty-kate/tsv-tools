@@ -9,8 +9,7 @@ let is_printable_char c =
 let tsv_to_image tsv =
   Notty.I.tabulate (Tsv.Padded.number_of_columns tsv) (Tsv.Padded.number_of_lines tsv) (fun x y ->
     let {Tsv.Padded.str; padding; last} = Tsv.Padded.get_cell x y tsv in
-    Notty.I.string Notty.A.empty
-      (String.init (CCVector.length str) (fun i -> CCVector.get str i)) <|>
+    Notty.I.string Notty.A.empty (Tsv.Str.to_string str) <|>
     if last then
       Notty.I.empty
     else
@@ -20,15 +19,20 @@ let rec loop ~cursor term tsv =
   Notty_unix.Term.image term (tsv_to_image tsv);
   let rec wait_for_event ~cursor =
     Notty_unix.Term.cursor term (Some cursor);
+    let insert_char c =
+      let x, y = cursor in
+      let cell, offset = Tsv.Cursor.get_cell ~sep x y tsv in
+      let {Tsv.Padded.str; padding = _; last = _} = cell in
+      Tsv.Str.insert str offset c;
+      Tsv.Padded.recompute_padding tsv;
+      loop ~cursor:(x + 1, y) term tsv
+    in
     match Notty_unix.Term.event term with
     | `End -> ()
     | `Key (`ASCII c, []) when is_printable_char c ->
-        let x, y = cursor in
-        let cell, offset = Tsv.Cursor.get_cell ~sep x y tsv in
-        let {Tsv.Padded.str; padding = _; last = _} = cell in
-        CCVector.insert str offset c;
-        Tsv.Padded.recompute_padding tsv;
-        loop ~cursor:(x + 1, y) term tsv
+        insert_char (Uchar.of_char c)
+    | `Key (`Uchar c, []) ->
+        insert_char c
     | `Key (`Backspace, []) ->
         let x, y = cursor in
         let cell, offset = Tsv.Cursor.get_cell ~sep x y tsv in
@@ -36,7 +40,7 @@ let rec loop ~cursor term tsv =
           wait_for_event ~cursor
         else
           let {Tsv.Padded.str; padding = _; last = _} = cell in
-          CCVector.remove_and_shift str (offset - 1);
+          Tsv.Str.remove str (offset - 1);
           Tsv.Padded.recompute_padding tsv;
           loop ~cursor:(x - 1, y) term tsv
     | `Key (`Enter, []) ->
