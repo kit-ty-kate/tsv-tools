@@ -53,6 +53,23 @@ module Str = struct
     CCVector.remove_and_shift str i
 end
 
+let to_string tsv =
+  let buf = Buffer.create 512 in
+  let len = CCVector.length tsv in
+  for y = 0 to len - 1 do
+    let row = CCVector.get tsv y in
+    let len = CCVector.length row in
+    for x = 0 to len - 1 do
+      Buffer.add_string buf (Str.to_string (CCVector.get row x));
+      if (x : int) < (len - 1 : int) then
+        Buffer.add_char buf '\t';
+    done;
+    (* TODO: Line ending character of TSV files is not defined.
+       Maybe we should store the current line endings, or ask the user. *)
+    Buffer.add_string buf "\r\n";
+  done;
+  Buffer.contents buf
+
 module Padded = struct
   type cell = {
     str : Str.t;
@@ -105,6 +122,11 @@ module Padded = struct
               padding = CCVector.length str + padding;
               last;
             }))
+
+  let to_tsv tsv =
+    CCVector.map (fun row ->
+      CCVector.map (fun cell -> cell.str) row)
+      tsv
 end
 
 module Cursor = struct

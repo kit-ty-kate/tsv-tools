@@ -3,6 +3,8 @@ type t
 val parse_from_string : string -> t
 val parse_from_file : string -> t
 
+val to_string : t -> string
+
 module Str : sig
   type t
 
@@ -29,6 +31,8 @@ module Padded : sig
   val insert_row : int -> padded -> unit
 
   val recompute_padding : padded -> unit
+
+  val to_tsv : padded -> t
 end
 
 module Cursor : sig
