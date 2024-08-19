@@ -35,7 +35,7 @@ let rec loop ~filename ~cursor term tsv =
       loop ~filename ~cursor term tsv
     in
     match Notty_unix.Term.event term with
-    | `End -> ()
+    | `End | `Key (`Escape, _) | `Key (`ASCII 'C', [`Ctrl]) -> ()
     | `Key (`ASCII c, []) when is_printable_char c ->
         insert_char (Uchar.of_char c)
     | `Key (`Uchar c, []) ->
@@ -81,9 +81,9 @@ let rec loop ~filename ~cursor term tsv =
         );
         display_message
           (fmt "You have successfully saved your file as '%s'" filename)
-    | `Key _ -> (* TODO *) ()
+    | `Key _ -> display_message "Key combination unsupported"
     | `Mouse _ -> assert false
-    | `Paste _ -> (* TODO *) ()
+    | `Paste _ -> display_message "Paste unsupported"
     | `Resize _ -> (* TODO *) wait_for_event ~cursor
   in
   wait_for_event ~cursor
