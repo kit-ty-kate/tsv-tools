@@ -83,7 +83,7 @@ let rec loop ~filename ~cursor term tsv =
           (fmt "You have successfully saved your file as '%s'" filename)
     | `Key _ -> display_message "Key combination unsupported"
     | `Mouse _ -> assert false
-    | `Paste _ -> display_message "Paste unsupported"
+    | `Paste _ -> (* TODO *) wait_for_event ~cursor
     | `Resize _ -> (* TODO *) wait_for_event ~cursor
   in
   wait_for_event ~cursor
