@@ -1,0 +1,19 @@
+opam-version: "2.0"
+version: "0.1.0"
+synopsis: "A collection of program to edit and view TSV (Tab-separated values) files"
+license: "BSD-1-Clause"
+maintainer: "Kate <kit-ty-kate@outlook.com>"
+authors: [
+  "Kate <kit-ty-kate@outlook.com>"
+]
+homepage: "https://github.com/kit-ty-kate/tsv-tools"
+dev-repo: "git+https://github.com/kit-ty-kate/tsv-tools.git"
+bug-reports: "https://github.com/kit-ty-kate/tsv-tools/issues"
+build: ["dune" "build" "-p" name "-j" jobs]
+depends: [
+  "ocaml" {>= "4.08"}
+  "dune" {>= "3.0"}
+  "containers" {>= "3.7"}
+  "notty" {>= "0.2.0"}
+  "uutf" {>= "1.0.0"}
+]
